@@ -19,7 +19,7 @@ class ViewController: UIViewController {
 
     @IBAction func popinClick(_ sender: Any) {
         statusLabel.text = "Connecting... Please wait";
-        Popin.shared.connect(token: 11506, popinDelegate: self);
+        Popin.shared.connect(token: 11583, popinDelegate: self);
     }
     
 }
