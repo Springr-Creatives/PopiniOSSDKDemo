@@ -6,9 +6,40 @@
 //
 
 import SwiftUI
+import Combine
 import PopinCall
 
+class PopinEventLog: ObservableObject, PopinInitListener, PopinEventsListener {
+    @Published var events: [String] = []
+
+    private func append(_ message: String) {
+        DispatchQueue.main.async {
+            let formatter = DateFormatter()
+            formatter.dateFormat = "HH:mm:ss"
+            self.events.append("[\(formatter.string(from: Date()))] \(message)")
+        }
+    }
+
+    // MARK: - PopinInitListener
+    func onInitComplete(userId: Int) { append("Init complete — userId: \(userId)") }
+    func onInitFailed(reason: String) { append("Init failed: \(reason)") }
+
+    // MARK: - PopinEventsListener
+    func onPermissionGiven() { append("Permission given") }
+    func onPermissionDenied() { append("Permission denied") }
+    func onCallStart() { append("Call started") }
+    func onCallAbandoned() { append("Call abandoned") }
+    func onQueuePositionChanged(position: Int) { append("Queue position: \(position)") }
+    func onCallMissed() { append("Call missed") }
+    func onCallNetworkFailure(participant: String) { append("Network failure — participant: \(participant)") }
+    func onCallConnected() { append("Call connected") }
+    func onCallFailed() { append("Call failed") }
+    func onCallEnd() { append("Call ended") }
+}
+
 struct ContentView: View {
+    @StateObject private var eventLog = PopinEventLog()
+
     var body: some View {
         VStack(spacing: 0) {
             Button(action: {
@@ -31,40 +62,39 @@ struct ContentView: View {
             .controlSize(.large)
             .frame(width: 200)
             .padding()
-            
-            ScrollView {
-                LazyVStack(spacing: 12) {
-                    ForEach(0..<50) { index in
-                        HStack(spacing: 12) {
-                            RoundedRectangle(cornerRadius: 8)
-                                .fill(Color.gray.opacity(0.3))
-                                .frame(width: 60, height: 60)
-                                .overlay(
-                                    Text("\(index + 1)")
-                                        .font(.headline)
-                                        .foregroundColor(.gray)
-                                )
-                            
-                            VStack(alignment: .leading, spacing: 4) {
-                                Text("Item \(index + 1)")
-                                    .font(.headline)
-                                Text("This is a description for item \(index + 1). Some dummy content to fill the space.")
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                    .lineLimit(2)
-                            }
-                            
-                            Spacer()
+
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 0) {
+                        if eventLog.events.isEmpty {
+                            Text("No events yet...")
+                                .font(.system(.caption, design: .monospaced))
+                                .foregroundColor(.secondary)
+                                .padding()
+                        } else {
+                            Text(eventLog.events.joined(separator: "\n"))
+                                .font(.system(.caption, design: .monospaced))
+                                .frame(maxWidth: .infinity, alignment: .leading)
+                                .padding()
                         }
-                        .padding()
-                        .background(Color(.systemBackground))
-                        .cornerRadius(12)
-                        .shadow(color: .black.opacity(0.05), radius: 4, y: 2)
+                        Color.clear.frame(height: 1).id("bottom")
                     }
                 }
+                .background(Color(.secondarySystemBackground))
+                .clipShape(RoundedRectangle(cornerRadius: 12))
                 .padding(.horizontal)
                 .padding(.bottom)
+                .onChange(of: eventLog.events.count) { _ in
+                    withAnimation {
+                        proxy.scrollTo("bottom", anchor: .bottom)
+                    }
+                }
             }
+        }
+        .onAppear {
+            let config = Popin.shared?.getConfig()
+            config?.initListener = eventLog
+            config?.eventsListener = eventLog
         }
     }
 }
