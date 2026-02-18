@@ -1,9 +1,0 @@
-${PODS_ROOT}/Target Support Files/Pods-PopinDemo/Pods-PopinDemo-frameworks.sh
-${BUILT_PRODUCTS_DIR}/AFNetworking/AFNetworking.framework
-${BUILT_PRODUCTS_DIR}/Alamofire/Alamofire.framework
-${BUILT_PRODUCTS_DIR}/NWWebSocket/NWWebSocket.framework
-${BUILT_PRODUCTS_DIR}/PopinCall/PopinCall.framework
-${BUILT_PRODUCTS_DIR}/PusherSwift/PusherSwift.framework
-${BUILT_PRODUCTS_DIR}/SwiftyJSON/SwiftyJSON.framework
-${BUILT_PRODUCTS_DIR}/TweetNacl/TweetNacl.framework
-${PODS_XCFRAMEWORKS_BUILD_DIR}/TwilioVideo/TwilioVideo.framework/TwilioVideo
